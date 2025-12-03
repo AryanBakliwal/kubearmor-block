@@ -95,15 +95,16 @@ jobs:
         run: |
           PODS_OUTPUT=$(kubectl get pods -n multiubuntu -o jsonpath="{.items[*].metadata.name}")
           POD_NAME=$(echo "$PODS_OUTPUT" | tr ' ' '\n' | grep '^ubuntu-1-deployment' | head -n 1)
-
+          
           kubectl describe pod $POD_NAME -n multiubuntu
-
+          
           CONTAINER_NAME=$(kubectl get pod "$POD_NAME" -n multiubuntu -o jsonpath="{.spec.containers[0].name}")
           ANNOTATION_KEY="container.apparmor.security.beta.kubernetes.io/${CONTAINER_NAME}"
           
-          # Check if annotation exists
-          ANNOTATION_VALUE=$(kubectl get pod "$POD_NAME" -n multiubuntu -o jsonpath="{.metadata.annotations[\"${ANNOTATION_KEY}\"]}")
-          
+          # Use go-template instead of jsonpath
+          ANNOTATION_VALUE=$(kubectl get pod "$POD_NAME" -n multiubuntu \
+            -o go-template="{{ index .metadata.annotations \"${ANNOTATION_KEY}\" }}")
+
           if [ -z "$ANNOTATION_VALUE" ]; then
             echo "Annotation $ANNOTATION_KEY is NOT present on pod $POD_NAME"
             exit 1
