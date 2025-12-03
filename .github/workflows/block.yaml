@@ -91,6 +91,24 @@ jobs:
           sleep 5
         working-directory: ./examples
 
+      - name: Check if pod has been annotated
+        run: |
+          PODS_OUTPUT=$(kubectl get pods -n multiubuntu -o jsonpath="{.items[*].metadata.name}")
+          POD_NAME=$(echo "$PODS_OUTPUT" | tr ' ' '\n' | grep '^ubuntu-1-deployment' | head -n 1)
+
+          CONTAINER_NAME="ubuntu-1"
+          ANNOTATION_KEY="container.apparmor.security.beta.kubernetes.io/${CONTAINER_NAME}"
+          
+          # Check if annotation exists
+          ANNOTATION_VALUE=$(kubectl get pod "$POD_NAME" -n multiubuntu -o "jsonpath={.metadata.annotations.${ANNOTATION_KEY}}")
+          
+          if [ -z "$ANNOTATION_VALUE" ]; then
+            echo "Annotation $ANNOTATION_KEY is NOT present on pod $POD_NAME"
+            exit 1
+          else
+            echo "Annotation found: $ANNOTATION_KEY = $ANNOTATION_VALUE"
+          fi
+
       - name: Execute ls in ubuntu pod with ksp present
         run: |
           # POD_NAME=$(kubectl get pod -n multiubuntu -l container=ubuntu-1 -o name)
