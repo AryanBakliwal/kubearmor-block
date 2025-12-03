@@ -4,44 +4,44 @@ metadata:
   name: audit-and-block
   namespace: multiubuntu
 spec:
-  process:
-    matchPaths:
-      - path: /bin/ls
-        action: Block
-        message: "Auditing /bin/ls execution"
-        severity: 8
-      - path: /bin/hostname
-        action: Block
-        message: "Blocking /bin/hostname execution"
-        severity: 5
   file:
     matchDirectories:
-      - dir: /usr/bin/
-        readOnly: true
-        recursive: true
-        action: Audit
-        message: "Auditing /bin/ directory"
-        severity: 3
-      - dir: /sbin/
-        readOnly: true
-        recursive: true
-        action: Block
-        message: "Blocking write action in /sbin/ directory"
-        severity: 3
+    - action: Audit
+      dir: /usr/bin/
+      message: Auditing /bin/ directory
+      readOnly: true
+      recursive: true
+      severity: 3
+    - action: Block
+      dir: /sbin/
+      message: Blocking write action in /sbin/ directory
+      readOnly: true
+      recursive: true
+      severity: 3
   network:
     matchProtocols:
-      - fromSource:
-          - path: /bin/ping
-        protocol: icmp
-        action: Audit
-        message: "Auditing Ping Network Operation"
-        severity: 1
-      - fromSource:
-          - path: /usr/bin/curl
-        protocol: tcp
-        action: Block
-        message: "Blocking curl network operation"
-        severity: 1
+    - action: Audit
+      fromSource:
+      - path: /bin/ping
+      message: Auditing Ping Network Operation
+      protocol: icmp
+      severity: 1
+    - action: Block
+      fromSource:
+      - path: /usr/bin/curl
+      message: Blocking curl network operation
+      protocol: tcp
+      severity: 1
+  process:
+    matchPaths:
+    - action: Audit
+      message: Auditing /bin/ls execution
+      path: /bin/ls
+      severity: 8
+    - action: Block
+      message: Blocking /bin/hostname execution
+      path: /bin/hostname
+      severity: 5
   selector:
     matchLabels:
       container: ubuntu-1
