@@ -96,6 +96,8 @@ jobs:
           PODS_OUTPUT=$(kubectl get pods -n multiubuntu -o jsonpath="{.items[*].metadata.name}")
           POD_NAME=$(echo "$PODS_OUTPUT" | tr ' ' '\n' | grep '^ubuntu-1-deployment' | head -n 1)
 
+          kubectl describe pod $POD_NAME -n multiubuntu
+
           CONTAINER_NAME="ubuntu-1"
           ANNOTATION_KEY="container.apparmor.security.beta.kubernetes.io/${CONTAINER_NAME}"
           
