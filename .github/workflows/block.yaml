@@ -48,8 +48,13 @@ jobs:
       #       kubectl rollout status --timeout=5m daemonset -l kubearmor-app=kubearmor -n kubearmor
       #       kubectl rollout status --timeout=5m deployment -n kubearmor -l kubearmor-app=kubearmor-controller -n kubearmor
       #       kubectl get pods -A
-      #     done  
+      #     done 
 
+      - name: Deploy multiubuntu deployment
+        run: |
+          kubectl apply -f multiubuntu-deployment.yaml
+          kubectl rollout status --timeout=5m deployment ubuntu-1-deployment -n multiubuntu
+        working-directory: ./examples
 
       - name: Install agents
         run: |
@@ -60,6 +65,7 @@ jobs:
           --set global.agents.url="stage.accuknox.com" \
           --set kubearmor-operator.enabled=true \
           --set kubearmor-operator.autoDeploy=true \
+          --set kubearmor-operator.kubearmorOperator.annotateExisting=true \
           --version v0.1.8
 
       - name: wait for agents to be running
@@ -78,12 +84,6 @@ jobs:
             kubectl rollout status --timeout=5m deployment -n agents -l kubearmor-app=kubearmor-controller -n agents
             kubectl get pods -A
           done
-
-      - name: Deploy multiubuntu deployment
-        run: |
-          kubectl apply -f multiubuntu-deployment.yaml
-          kubectl rollout status --timeout=5m deployment ubuntu-1-deployment -n multiubuntu
-        working-directory: ./examples
 
       - name: Apply KSP
         run: |
